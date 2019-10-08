@@ -1,3 +1,5 @@
 /design/*.vpp.bak_*
 /design/*.vpp.lck
 __pycache__
+*.pyc
+/.vscode/
