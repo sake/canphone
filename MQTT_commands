@@ -1,0 +1,20 @@
+# initialising phone
+/baresip/event {"type":"REGISTER_OK","class":"register","accountaor":"sip:4362@voip.eventphone.de","param":"200 OK"}
+
+
+# initiating call
+/baresip/command/ {"command":"dial","params":"sip:3564@voip.eventphone.de"}
+/baresip/command_resp/nil (null)
+/baresip/event {"type":"CALL_RINGING","class":"call","accountaor":"sip:4362@voip.eventphone.de","direction":"outgoing","peeruri":"sip:3564@voip.eventphone.de","id":"79d04cc84a722b1c","param":"sip:3564@voip.eventphone.de"}
+/baresip/event {"type":"CALL_ESTABLISHED","class":"call","accountaor":"sip:4362@voip.eventphone.de","direction":"outgoing","peeruri":"sip:3564@voip.eventphone.de","id":"79d04cc84a722b1c","param":"sip:3564@voip.eventphone.de"}
+/baresip/event {"type":"CALL_CLOSED","class":"call","accountaor":"sip:4362@voip.eventphone.de","direction":"outgoing","peeruri":"sip:3564@voip.eventphone.de","id":"79d04cc84a722b1c","param":"Connection reset by peer"}
+
+
+# accepting call
+/baresip/event {"type":"CALL_INCOMING","class":"call","accountaor":"sip:4362@voip.eventphone.de","direction":"incoming","peeruri":"sip:3564@148.251.63.154","id":"1599653638@148.251.63.154","param":"sip:3564@148.251.63.154"}
+/baresip/command/ {"command":"accept"}
+/baresip/command_resp/nil sip:4362@voip.eventphone.de: Answering incoming call
+/baresip/event {"type":"CALL_ESTABLISHED","class":"call","accountaor":"sip:4362@voip.eventphone.de","direction":"incoming","peeruri":"sip:3564@148.251.63.154","id":"1599653638@148.251.63.154","param":"sip:3564@148.251.63.154"}
+/baresip/command/ {"command":"hangup","token":"1234"}
+/baresip/event {"type":"CALL_CLOSED","class":"call","accountaor":"sip:4362@voip.eventphone.de","direction":"incoming","peeruri":"sip:3564@148.251.63.154","id":"1599653638@148.251.63.154","param":"Connection reset by user"}
+/baresip/command_resp/1234 (null)
