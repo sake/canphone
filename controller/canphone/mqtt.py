@@ -26,8 +26,9 @@ class MqttController:
         self.client.on_message = self.__on_message
         self.evtCallback: Optional[EventCallback] = None
 
-    def connect(self, host, port=1883, keepalive=60):
+    def connect(self, connectCallback, host, port=1883, keepalive=60):
         log.info("Trying to connect MQTT client.")
+        self.connectCallback = connectCallback
         self.client.connect(host, port, keepalive)
         self.client.loop_start()
 
@@ -44,6 +45,7 @@ class MqttController:
     def __on_connect(self, client, userdata, flags, rc):
         log.info("MQTT client connected, registering subscriptions.")
         self.client.subscribe("/baresip/event")
+        self.connectCallback()
 
     def __on_message(self, client, userdata, msg: MQTTMessage):
         log.info("MQTT message received for path=%s.", msg.topic)
