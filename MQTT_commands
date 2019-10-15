@@ -18,3 +18,7 @@
 /baresip/command/ {"command":"hangup","token":"1234"}
 /baresip/event {"type":"CALL_CLOSED","class":"call","accountaor":"sip:4362@voip.eventphone.de","direction":"incoming","peeruri":"sip:3564@148.251.63.154","id":"1599653638@148.251.63.154","param":"Connection reset by user"}
 /baresip/command_resp/1234 (null)
+
+
+# send a message to the selected contact
+/baresip/command/ {"command":"message", "params":"123"}
