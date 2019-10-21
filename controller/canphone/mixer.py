@@ -2,8 +2,9 @@ import alsaaudio
 
 # documentation for alsa: https://larsimmisch.github.io/pyalsaaudio/libalsaaudio.html
 
-# implement class capable of toggle mute of the speaker and microphone
-# initial state of the mixer shall be set to mic mute, speaker not mute
+# implementing class capable of toggle between speak (speaker on , mic off) 
+# and listen mode (speaker off, mic on)
+# initial stet is mute for both
 
 OUTPUTNAME = "Speaker"
 INPUTNAME = "Mic"
@@ -12,29 +13,29 @@ CARDNAME = "Device"
 DEFAULT_VOL_OUT = 70
 DEFAULT_VOL_IN = 70
 
-def getCardIndex():
-    return alsaaudio.cards().index(CARDNAME)
+def getCardIndex(cardName):
+    return alsaaudio.cards().index(cardName)
 
-class canMixer():
-    def __init__(self):
-        self.Out = alsaaudio.Mixer(OUTPUTNAME, cardindex=getCardIndex())
-        self.In = alsaaudio.Mixer(INPUTNAME, cardindex=getCardIndex())
-        self.Out.setvolume(DEFAULT_VOL_OUT)
-        self.In.setvolume(DEFAULT_VOL_IN)
-        self.Out.setmute(False)
-        self.In.setmute(True)
+class CanMixer():
+    def __init__(self, cardName=CARDNAME, inName=INPUTNAME, outName=OUTPUTNAME, defVolOut=DEFAULT_VOL_OUT, defVolIn=DEFAULT_VOL_IN):
+        cardindex=getCardIndex(cardName)
+        self.mixOut = alsaaudio.Mixer(outName, cardindex=cardindex)
+        self.mixIn = alsaaudio.Mixer(inName, cardindex=cardindex)
+        self.mixOut.setvolume(defVolOut)
+        self.mixIn.setvolume(defVolIn)
+        self.mute()
 
-def speak():
-    canMixer.Out.setmute(True)
-    canMixer.In.setmute(False)
+    def speak(self):
+        self.mixOut.setmute(True)
+        self.mixIn.setmute(False)
+    
+    def listen(self):
+        self.mixOut.setmute(False)
+        self.mixIn.setmute(True)
 
-def listen():
-    canMixer.Out.setmute(False)
-    canMixer.In.setmute(True)
-try:
-    canMixer = canMixer()
-except:
-    print("Error - card not found")
+    def mute(self):
+        self.mixOut.setmute(True)
+        self.mixIn.setmute(True)
 
 
 
