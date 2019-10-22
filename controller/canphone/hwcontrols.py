@@ -52,6 +52,7 @@ class PhoneControls:
         self.cbCan(enumState)
 
     def startBlinking(self):
+        self.stopBlinking()
         self.blinkThread = threading.Thread(target=self.__blinking__)
 
     def stopBlinking(self):
