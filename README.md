@@ -10,6 +10,8 @@
 ```
 apt install baresip
 apt install mosquitto 
+apt install libasound2-dev
+apt install rpi.gpio
 
 ```
 
@@ -24,3 +26,13 @@ apt install mosquitto
 
 # SystemD services
 - Copy and enable service files under systemd_service_files
+
+
+
+clone the git at github: sake/canphone
+
+then cd into the the directory and do: 
+ $ pip3 install -r requirements.txt
+ $ pip3 install -r requirements-dev.txt
+
+
