@@ -61,6 +61,7 @@ class PhoneControls:
     def startBlinking(self):
         self.stopBlinking()
         self.blinkThread = threading.Thread(target=self.__blinking__)
+        self.blinkThread.start()
 
     def stopBlinking(self):
         if self.blinkThread != None:
@@ -68,6 +69,7 @@ class PhoneControls:
             self.blinkThread = None
 
     def __blinking__(self):
+        log.debug("Starting blink loop.")
         while True:
             self.led.on
             sleep(1) 
