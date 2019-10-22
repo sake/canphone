@@ -18,15 +18,14 @@ class PttState(Enum):
     RELEASED = auto()
 
 class PhoneControls:
-    def __init__(self,  callbPush, callbHang, led = LED(17), pushToTalkButton = Device.pin_factory.pin(18), hangUpButton = Device.pin_factory.pin(19), isItBlinking = False):
+    def __init__(self,  callbPush, callbHang, ledPin = 17, pttPin = 18, canPin = 19):
         # define properties
-        self.led = led
-        self.isItBlinking = isItBlinking
-        self.pushToTalkButton = pushToTalkButton
-        self.hangUpButton = hangUpButton
+        self.led = LED(ledPin)
+        self.pushToTalkButton = Device.pin_factory.pin(pttPin)
+        self.hangUpButton = Device.pin_factory.pin(canPin)
         # configure hardware
-        self.__configPinHandler__(pushToTalkButton, self.__pttCallback__)
-        self.__configPinHandler__(hangUpButton, self.__canCallback__)
+        self.__configPinHandler__(self.pushToTalkButton, self.__pttCallback__)
+        self.__configPinHandler__(self.hangUpButton, self.__canCallback__)
         self.cbCan = callbHang
         self.cbPtt = callbPush
 
