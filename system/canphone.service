@@ -1,0 +1,12 @@
+[Unit]
+Description=canphoneController
+After=network.target
+
+[Service]
+User=pi
+Group=pi
+WorkingDirectory=/home/pi
+ExecStart=/usr/bin/python3 /home/pi/canphone/controller/canphone.py
+
+[Install]
+WantedBy=multi-user.target
