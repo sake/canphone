@@ -1,4 +1,5 @@
 from .mqtt import MqttController, EventType
+from .mixer import CanMixer
 import json
 import logging
 from enum import Enum, auto
@@ -22,6 +23,11 @@ class CanController:
     def __init__(self):
         self.state = PhoneState.WAITING
         self.mqtt = MqttController()
+        try:
+            self.mixer= CanMixer()
+        except:
+            log.error("Soundcard not found")
+
         # register first callback
         self.mqtt.setCallback(self.__phoneCallback__)
         #self.peri.setCallback(self.__waitingForCanPickup__)
@@ -90,7 +96,9 @@ class CanController:
         pass
     
     def hearingState(self):
+        self.mixer.listen()
         pass
 
     def speakingState(self):
+        self.mixer.speak()
         pass
