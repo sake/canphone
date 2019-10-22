@@ -45,18 +45,18 @@ class PhoneControls:
         state = self.canButton.state
         log.debug("Can button state=%d", state)
         if state == 1:
-            self.cbPtt(CanState.HUNGUP)
+            self.cbCan(CanState.HUNGUP)
         else:
-            self.cbPtt(CanState.LIFTED)
+            self.cbCan(CanState.LIFTED)
 
     def __pttCallback__(self, ticks, state):
         sleep(0.2)
         state = self.pttButton.state
         log.debug("PTT button state=%d", state)
         if state == 1:
-            self.cbCan(PttState.PRESSED)
+            self.cbPtt(PttState.PRESSED)
         else:
-            self.cbCan(PttState.RELEASED)
+            self.cbPtt(PttState.RELEASED)
 
     def startBlinking(self):
         self.stopBlinking()
