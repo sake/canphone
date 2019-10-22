@@ -1,14 +1,17 @@
 from .mqtt import MqttController, EventType
 from .mixer import CanMixer
+from .hwcontrols import PhoneControls, CanState, PttState
 import json
 import logging
 from enum import Enum, auto
+import threading
 
 
 log = logging.getLogger("canphone")
 
 
 class PhoneState(Enum):
+    INIT = auto()
     WAITING = auto()
     CALLING = auto()
     ESTABLISHED = auto()
@@ -21,22 +24,22 @@ class PhoneState(Enum):
 class CanController:
 
     def __init__(self):
-        self.state = PhoneState.WAITING
+        self.state = PhoneState.INIT
         self.mqtt = MqttController()
-        try:
-            self.mixer= CanMixer()
-        except:
-            log.error("Soundcard not found")
+        self.mixer = CanMixer()
+        self.hw = PhoneControls(self.__pttCallback__, self.__canCallback__)
+        self.lock = threading.Lock()
 
-        # register first callback
+        # register callback
         self.mqtt.setCallback(self.__phoneCallback__)
-        #self.peri.setCallback(self.__waitingForCanPickup__)
 
     def start(self):
+        self.mixer.mute()
         self.mqtt.connect(self.waitingState, "localhost")
 
     def stop(self):
         self.mqtt.disconnect()
+        self.mixer.mute
         #self.peri.stop()
         
     def dial(self, phoneNumber: str):
@@ -44,9 +47,26 @@ class CanController:
         msgStr = json.dumps(msgObj)
         self.mqtt.send_command(msgStr)
 
+    def dialMainContact(self):
+        msgObj = {"command": "dialcontact"}
+        msgStr = json.dumps(msgObj)
+        self.mqtt.send_command(msgStr)
+
+    def acceptCall(self):
+        msgObj = {"command": "accept"}
+        msgStr = json.dumps(msgObj)
+        self.mqtt.send_command(msgStr)
+
+    def hangupCall(self):
+        msgObj = {"command": "hangup"}
+        msgStr = json.dumps(msgObj)
+        self.mqtt.send_command(msgStr)
+
+
     # Callbacks interacting with the softphone
 
     def __phoneCallback__(self, evt: EventType, msg):
+        self.lock.acquire()
         log.debug("Callback received event=%s", evt)
         if evt is EventType.CALL_CLOSED:
             log.info("Going to waiting state after close message.")
@@ -59,46 +79,67 @@ class CanController:
             if self.state in { PhoneState.CALLING, PhoneState.ACCEPTING }:
                 log.info("Establishing incoming call.")
                 self.establishedState()
+        self.lock.release()
 
     # Peripheral callbacks
 
-    def __canCallback__(self):
-        # send call command
-        msgStr = json.dumps({"command": "dialcontact"})
-        self.mqtt.send_command(msgStr)
+    def __canCallback__(self, canStatus):
+        self.lock.acquire()
+        if canStatus == CanState.LIFTED:
+            if self.state == PhoneState.WAITING:
+                self.callingState()
+            elif self.state == PhoneState.RINGING:
+                self.acceptingState()
+        elif canStatus == CanState.HUNGUP:
+            if self.state in { PhoneState.CALLING, PhoneState.ESTABLISHED, PhoneState.HEARING, PhoneState.SPEAKING }:
+                self.waitingState()
+        self.lock.release()
 
-    def __pttCallback__(self):
+    def __pttCallback__(self, pttStatus):
+        self.lock.acquire()
         if self.state is PhoneState.HEARING:
-            self.speakingState()
+            if pttStatus == PttState.PRESSED:
+                self.speakingState()
         elif self.state is PhoneState.SPEAKING:
-            self.hearingState()
+            if pttStatus == PttState.RELEASED:
+                self.hearingState()
+        self.lock.release()
 
 
     # statemachine
 
     def waitingState(self):
-        pass
+        log.debug("Waiting entered.")
+        self.state = PhoneState.WAITING
+        self.mixer.mute()
+        self.hw.stopBlinking()
+        self.hangupCall()
 
     def callingState(self):
-        pass
+        log.debug("Calling entered.")
+        self.state = PhoneState.CALLING
+        self.dialMainContact()
 
     def acceptingState(self):
+        log.debug("Accepting entered.")
         self.state = PhoneState.ACCEPTING
-        # accept call
-        msgObj = {"command": "accept"}
-        msgStr = json.dumps(msgObj)
-        self.mqtt.send_command(msgStr)
+        self.acceptCall()
 
     def establishedState(self):
-        pass
+        log.debug("Established entered.")
+        self.state = PhoneState.ESTABLISHED
+        self.hearingState()
 
     def ringingState(self):
-        pass
+        log.debug("Ringing entered.")
+        self.state = PhoneState.RINGING
     
     def hearingState(self):
+        log.debug("Hearing entered.")
+        self.state = PhoneState.HEARING
         self.mixer.listen()
-        pass
 
     def speakingState(self):
+        log.debug("Speaking entered.")
+        self.state = PhoneState.SPEAKING
         self.mixer.speak()
-        pass

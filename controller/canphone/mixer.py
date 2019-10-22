@@ -36,6 +36,3 @@ class CanMixer():
     def mute(self):
         self.mixOut.setmute(True)
         self.mixIn.setmute(True)
-
-
-
