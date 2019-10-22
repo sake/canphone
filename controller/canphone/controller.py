@@ -80,11 +80,13 @@ class CanController:
                 log.info("Establishing incoming call.")
                 self.establishedState()
         self.lock.release()
+        log.debug("Finished phone event callback.")
 
     # Peripheral callbacks
 
     def __canCallback__(self, canStatus):
         self.lock.acquire()
+        log.debug("Can callback event=%s", canStatus)
         if canStatus == CanState.LIFTED:
             if self.state == PhoneState.WAITING:
                 self.callingState()
@@ -94,9 +96,11 @@ class CanController:
             if self.state in { PhoneState.CALLING, PhoneState.ESTABLISHED, PhoneState.HEARING, PhoneState.SPEAKING }:
                 self.waitingState()
         self.lock.release()
+        log.debug("Finished can event callback.")
 
     def __pttCallback__(self, pttStatus):
         self.lock.acquire()
+        log.debug("PTT callback event=%s", pttStatus)
         if self.state is PhoneState.HEARING:
             if pttStatus == PttState.PRESSED:
                 self.speakingState()
@@ -104,6 +108,7 @@ class CanController:
             if pttStatus == PttState.RELEASED:
                 self.hearingState()
         self.lock.release()
+        log.debug("Finished PTT event callback.")
 
 
     # statemachine
