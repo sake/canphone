@@ -45,7 +45,8 @@ class MqttController:
     def __on_connect(self, client, userdata, flags, rc):
         log.info("MQTT client connected, registering subscriptions.")
         self.client.subscribe("/baresip/event")
-        self.connectCallback()
+        t = threading.Thread(target=self.connectCallback)
+        t.start()
 
     def __on_message(self, client, userdata, msg: MQTTMessage):
         log.info("MQTT message received for path=%s.", msg.topic)
