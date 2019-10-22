@@ -37,7 +37,7 @@ class PhoneControls:
     def __configPinHandler__(self, button: Pin, cb):
         button.edges = "both"
         button.input_with_pull("up")
-        button.bounce = 250
+        button.bounce = .250
         button.when_changed = cb
 
     def __canCallback__(self, ticks, state):
