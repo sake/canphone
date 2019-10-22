@@ -1,8 +1,13 @@
 import threading
 from gpiozero import LED, Button, Device, Pin
+from gpiozero.pins.mock import MockFactory
 from signal import pause
 from time import sleep
 from enum import Enum, auto
+
+
+#Device.pin_factory = MockFactory()
+
 
 class CanState(Enum):
     LIFTED = auto()
@@ -46,7 +51,7 @@ class PhoneControls:
         else:
             enumState = PttState.RELEASED
         self.cbCan(enumState)
-    
+
     def startBlinking(self):
         self.blinkThread = threading.Thread(target=self.__blinking__)
 
@@ -54,7 +59,7 @@ class PhoneControls:
         if self.blinkThread != None:
             self.blinkThread._stop()
             self.blinkThread = None
-        
+
     def __blinking__(self):
         while True:
             self.led.on
