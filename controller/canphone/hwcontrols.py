@@ -4,8 +4,12 @@ from gpiozero.pins.mock import MockFactory
 from signal import pause
 from time import sleep
 from enum import Enum, auto
+import logging
 
 
+log = logging.getLogger("canphone")
+
+# uncomment to run on PC hardware
 #Device.pin_factory = MockFactory()
 
 
@@ -20,6 +24,7 @@ class PttState(Enum):
 class PhoneControls:
     def __init__(self,  callbPush, callbHang, ledPin = 17, pttPin = 18, canPin = 19):
         # define properties
+        self.blinkThread = None
         self.led = LED(ledPin)
         self.pushToTalkButton = Device.pin_factory.pin(pttPin)
         self.hangUpButton = Device.pin_factory.pin(canPin)
@@ -36,20 +41,18 @@ class PhoneControls:
         button.when_changed = cb
 
     def __canCallback__(self, ticks, state):
-        # TODO: convert state
+        log.debug("Can button state=%d", state)
         if state == 1:
-            enumState = CanState.HUNGUP
+            self.cbPtt(CanState.HUNGUP)
         else:
-            enumState = CanState.LIFTED
-        self.cbCan(enumState)
+            self.cbPtt(CanState.LIFTED)
 
     def __pttCallback__(self, ticks, state):
-        # TODO: convert state
+        log.debug("PTT button state=%d", state)
         if state == 1:
-            enumState = PttState.PRESSED
+            self.cbCan(PttState.PRESSED)
         else:
-            enumState = PttState.RELEASED
-        self.cbCan(enumState)
+            self.cbCan(PttState.RELEASED)
 
     def startBlinking(self):
         self.stopBlinking()
