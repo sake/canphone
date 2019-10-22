@@ -40,7 +40,7 @@ class CanController:
     def stop(self):
         self.mqtt.disconnect()
         self.mixer.mute
-        #self.peri.stop()
+        self.hw.stopBlinking()
         
     def dial(self, phoneNumber: str):
         msgObj = {"command": "dial", "params": phoneNumber}
@@ -112,12 +112,13 @@ class CanController:
         log.debug("Waiting entered.")
         self.state = PhoneState.WAITING
         self.mixer.mute()
-        self.hw.stopBlinking()
+        self.hw.startBlinking() # wait blink
         self.hangupCall()
 
     def callingState(self):
         log.debug("Calling entered.")
         self.state = PhoneState.CALLING
+        self.hw.startBlinking() # calling blink
         self.dialMainContact()
 
     def acceptingState(self):
@@ -133,13 +134,17 @@ class CanController:
     def ringingState(self):
         log.debug("Ringing entered.")
         self.state = PhoneState.RINGING
+        self.hw.startBlinking() # ringing blink
     
     def hearingState(self):
         log.debug("Hearing entered.")
         self.state = PhoneState.HEARING
         self.mixer.listen()
+        self.hw.stopBlinking()
+        # TODO: set led
 
     def speakingState(self):
         log.debug("Speaking entered.")
         self.state = PhoneState.SPEAKING
         self.mixer.speak()
+        # TODO: set led
