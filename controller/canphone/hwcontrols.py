@@ -26,11 +26,11 @@ class PhoneControls:
         # define properties
         self.blinkThread = None
         self.led = LED(ledPin)
-        self.pushToTalkButton = Device.pin_factory.pin(pttPin)
-        self.hangUpButton = Device.pin_factory.pin(canPin)
+        self.pttButton = Device.pin_factory.pin(pttPin)
+        self.canButton:Pin = Device.pin_factory.pin(canPin)
         # configure hardware
-        self.__configPinHandler__(self.pushToTalkButton, self.__pttCallback__)
-        self.__configPinHandler__(self.hangUpButton, self.__canCallback__)
+        self.__configPinHandler__(self.pttButton, self.__pttCallback__)
+        self.__configPinHandler__(self.canButton, self.__canCallback__)
         self.cbCan = callbHang
         self.cbPtt = callbPush
 
@@ -41,6 +41,8 @@ class PhoneControls:
         button.when_changed = cb
 
     def __canCallback__(self, ticks, state):
+        sleep(0.2)
+        state = self.canButton.state
         log.debug("Can button state=%d", state)
         if state == 1:
             self.cbPtt(CanState.HUNGUP)
@@ -48,6 +50,8 @@ class PhoneControls:
             self.cbPtt(CanState.LIFTED)
 
     def __pttCallback__(self, ticks, state):
+        sleep(0.2)
+        state = self.pttButton.state
         log.debug("PTT button state=%d", state)
         if state == 1:
             self.cbCan(PttState.PRESSED)
