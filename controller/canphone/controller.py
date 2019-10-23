@@ -118,6 +118,7 @@ class CanController:
         log.debug("Waiting entered.")
         self.state = PhoneState.WAITING
         self.mixer.mute()
+        self.hw.stopBeep()
         self.hw.startBlinking(Color3.CYAN.value, 2) # wait blink
         self.hangupCall()
 
@@ -130,6 +131,7 @@ class CanController:
     def acceptingState(self):
         log.debug("Accepting entered.")
         self.state = PhoneState.ACCEPTING
+        self.hw.stopBeep()
         self.acceptCall()
 
     def establishedState(self):
@@ -141,6 +143,7 @@ class CanController:
         log.debug("Ringing entered.")
         self.state = PhoneState.RINGING
         self.hw.startBlinking(Color3.MAGENTA.value) # ringing blink
+        self.hw.beep()
     
     def hearingState(self):
         log.debug("Hearing entered.")

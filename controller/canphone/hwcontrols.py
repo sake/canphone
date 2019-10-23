@@ -1,5 +1,5 @@
 from threading import RLock, Lock, Event, Thread
-from gpiozero import RGBLED, Button, Device, Pin
+from gpiozero import RGBLED, Device, Pin, Buzzer
 from gpiozero.pins.mock import MockFactory
 from signal import pause
 from time import sleep
@@ -33,9 +33,10 @@ class Color3(Enum):
 
 
 class PhoneControls:
-    def __init__(self,  callbPush, callbHang, ledPins = (17, 27, 22), pttPin = 18, canPin = 19):
+    def __init__(self,  callbPush, callbHang, ledPins = (17, 27, 22), buzzerPin = 5, pttPin = 18, canPin = 19):
         # define properties
         self.led = RGBLED(ledPins[0], ledPins[1], ledPins[2])
+        self.buzzer = Buzzer(buzzerPin)
         self.pttButton = Device.pin_factory.pin(pttPin)
         self.canButton: Pin = Device.pin_factory.pin(canPin)
         # configure hardware
@@ -76,3 +77,9 @@ class PhoneControls:
 
     def startBlinking(self, rgb=(1, 1, 1), time=1):
         self.led.blink(on_time=time, off_time=time, on_color=rgb, background=True)
+
+    def beep(self):
+        self.buzzer.beep(on_time=1, off_time=0.25, background=True)
+
+    def stopBeep(self):
+        self.buzzer.off()
