@@ -75,5 +75,17 @@ class PhoneControls:
             self.rgbled.begin()
             self.rgbled.setPixelColorRGB(0, self.R, self.G, self.B)
             self.rgbled.show()
+            sleep(1)
             self.rgbled.setPixelColorRGB(0, 0, 0, 0)
             self.rgbled.show()
+            sleep(1)
+
+    def lightOn(self, R, G, B):
+        self.rgbled.begin()
+        self.rgbled.setPixelColorRGB(0, self.R, self.G, self.B)
+        self.rgbled.show()
+        
+    def lightOff(self):
+        self.rgbled.begin()
+        self.rgbled.setPixelColorRGB(0, 0, 0, 0)
+        self.rgbled.show()

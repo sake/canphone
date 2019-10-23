@@ -41,6 +41,7 @@ class CanController:
         self.mqtt.disconnect()
         self.mixer.mute
         self.hw.stopBlinking()
+        self.hw.lightOff()
         
     def dial(self, phoneNumber: str):
         msgObj = {"command": "dial", "params": phoneNumber}
@@ -146,10 +147,10 @@ class CanController:
         self.state = PhoneState.HEARING
         self.mixer.listen()
         self.hw.stopBlinking()
-        # TODO: set led
+        self.hw.lightOn(0, 255, 0) # green light
 
     def speakingState(self):
         log.debug("Speaking entered.")
         self.state = PhoneState.SPEAKING
         self.mixer.speak()
-        # TODO: set led
+        self.hw.lightOn(255, 255, 255) # white light
