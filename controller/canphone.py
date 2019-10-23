@@ -32,8 +32,9 @@ def main():
     signal.signal(signal.SIGINT, on_term)
     signal.signal(signal.SIGTERM, on_term)
 
-    # simulate main loop
-    time.sleep(500)
+    # keep this function busy until interrupot kills the program
+    while True:
+        time.sleep(500)
 
 if __name__ == '__main__':
     sys.exit(main())
