@@ -65,9 +65,9 @@ class PhoneControls:
         state = self.pttButton.state
         log.debug("PTT button state=%d", state)
         if state == 1:
-            self.cbPtt(PttState.PRESSED)
-        else:
             self.cbPtt(PttState.RELEASED)
+        else:
+            self.cbPtt(PttState.PRESSED)
 
     def ledOff(self):
         self.led.off()
