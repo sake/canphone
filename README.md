@@ -23,6 +23,9 @@ apt install rpi.gpio
 - Copy baresipconf folder to ~/.baresip
 - Alter files accounts to match your extension credentials
 - Adjust contacts file to match other canphone
+- Change /usr/share/alsa/alsa.conf
+  - set defaults.ctl.card 1 
+  - set defaults.pcm.card 1 
 
 # SystemD services
 - Copy and enable service files under systemd_service_files
