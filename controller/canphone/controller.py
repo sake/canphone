@@ -40,8 +40,8 @@ class CanController:
     def stop(self):
         self.mqtt.disconnect()
         self.mixer.mute
-        self.hw.stopBlinking()
-        self.hw.lightOff()
+        self.hw.stopBeep()
+        self.hw.ledOff()
         
     def dial(self, phoneNumber: str):
         msgObj = {"command": "dial", "params": phoneNumber}
