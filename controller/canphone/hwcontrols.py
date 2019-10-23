@@ -75,8 +75,8 @@ class PhoneControls:
     def ledOn(self, rgb=(1, 1, 1)):
         self.led.value = rgb
 
-    def startBlinking(self, rgb=(1, 1, 1), time=1):
-        self.led.blink(on_time=time, off_time=time, on_color=rgb, background=True)
+    def startBlinking(self, rgb=(1, 1, 1), off_time=0.5, on_time=0.5):
+        self.led.blink(on_time=on_time, off_time=off_time, on_color=rgb, background=True)
 
     def beep(self):
         self.buzzer.beep(on_time=1, off_time=0.25, background=True)

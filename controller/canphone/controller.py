@@ -119,7 +119,7 @@ class CanController:
         self.state = PhoneState.WAITING
         self.mixer.mute()
         self.hw.stopBeep()
-        self.hw.startBlinking(Color3.CYAN.value, 2) # wait blink
+        self.hw.startBlinking(Color3.CYAN.value, off_time=3) # wait blink
         self.hangupCall()
 
     def callingState(self):
