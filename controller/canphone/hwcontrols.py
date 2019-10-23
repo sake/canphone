@@ -33,10 +33,10 @@ class Color3(Enum):
 
 
 class PhoneControls:
-    def __init__(self,  callbPush, callbHang, ledPins = (17, 27, 22), buzzerPin = 5, pttPin = 18, canPin = 19):
+    def __init__(self,  callbPush, callbHang, ledPins = (17, 27, 22), buzzerPin = 13, pttPin = 18, canPin = 19):
         # define properties
         self.led = RGBLED(ledPins[0], ledPins[1], ledPins[2])
-        self.buzzer = Buzzer(buzzerPin, active_high=False)
+        self.buzzer = Buzzer(buzzerPin, active_high=True)
         self.pttButton = Device.pin_factory.pin(pttPin)
         self.canButton: Pin = Device.pin_factory.pin(canPin)
         # configure hardware
