@@ -1,4 +1,4 @@
-import threading
+from threading import RLock, Lock, Event, Thread
 from gpiozero import LED, Button, Device, Pin
 from gpiozero.pins.mock import MockFactory
 from signal import pause
@@ -24,10 +24,13 @@ class PttState(Enum):
 class PhoneControls:
     def __init__(self,  callbPush, callbHang, ledPin = 17, pttPin = 18, canPin = 19):
         # define properties
-        self.blinkThread = None
+        self.blinkThread: Thread = None
+        self.blinkEvent = Event()
+        self.blinkThreadLock = RLock()
+        self.lightLock = Lock()
         self.led = LED(ledPin)
         self.pttButton = Device.pin_factory.pin(pttPin)
-        self.canButton:Pin = Device.pin_factory.pin(canPin)
+        self.canButton: Pin = Device.pin_factory.pin(canPin)
         # configure hardware
         self.__configPinHandler__(self.pttButton, self.__pttCallback__)
         self.__configPinHandler__(self.canButton, self.__canCallback__)
@@ -60,32 +63,43 @@ class PhoneControls:
             self.cbPtt(PttState.RELEASED)
 
     def startBlinking(self, R=255, G=255, B=255):
-        self.stopBlinking()
-        self.blinkThread = threading.Thread(target=self.__blinking__(self.R,self.G,self.B))
-        self.blinkThread.start()
+        with self.blinkThreadLock:
+            self.stopBlinking()
+            self.blinkThread = Thread(target=self.__blinking__, args=(R, G, B))
+            self.blinkEvent.clear()
+            self.blinkThread.start()
 
     def stopBlinking(self):
-        if self.blinkThread != None:
-            self.blinkThread._stop()
-            self.blinkThread = None
+        with self.blinkThreadLock:
+            if self.blinkThread != None:
+                self.blinkEvent.set()
+                self.blinkThread.join()
+                self.blinkThread = None
 
     def __blinking__(self, R, G, B):
         log.debug("Starting blink loop.")
-        while True:
-            self.rgbled.begin()
-            self.rgbled.setPixelColorRGB(0, self.R, self.G, self.B)
-            self.rgbled.show()
-            sleep(1)
-            self.rgbled.setPixelColorRGB(0, 0, 0, 0)
-            self.rgbled.show()
-            sleep(1)
+        while not self.blinkEvent.is_set():
+            self.__lightOn__(R, G, B)
+            self.blinkEvent.wait(1)
+            self.__lightOff__()
+            self.blinkEvent.wait(1)
 
-    def lightOn(self, R, G, B):
-        self.rgbled.begin()
-        self.rgbled.setPixelColorRGB(0, self.R, self.G, self.B)
-        self.rgbled.show()
+    def lightOn(self, R=255, G=255, B=255):
+        self.stopBlinking()
+        self.__lightOn__(R, G, B)
+
+    def __lightOn__(self, R, G, B):
+        with self.lightLock:
+            self.rgbled.begin()
+            self.rgbled.setPixelColorRGB(0, R, G, B)
+            self.rgbled.show()
         
     def lightOff(self):
-        self.rgbled.begin()
-        self.rgbled.setPixelColorRGB(0, 0, 0, 0)
-        self.rgbled.show()
+        self.stopBlinking()
+        self.__lightOff__()
+
+    def __lightOff__(self):
+        with self.lightLock:
+            self.rgbled.begin()
+            self.rgbled.setPixelColorRGB(0, 0, 0, 0)
+            self.rgbled.show()
