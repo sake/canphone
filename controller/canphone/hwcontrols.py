@@ -5,7 +5,7 @@ from signal import pause
 from time import sleep
 from enum import Enum, auto
 import logging
-
+from rpi_ws281x import *
 
 log = logging.getLogger("canphone")
 
@@ -33,6 +33,7 @@ class PhoneControls:
         self.__configPinHandler__(self.canButton, self.__canCallback__)
         self.cbCan = callbHang
         self.cbPtt = callbPush
+        self.rgbled = Adafruit_NeoPixel(TOTAL_LED_COUNT, ledPin, 800000, 5, False, 255)
 
     def __configPinHandler__(self, button: Pin, cb):
         button.edges = "both"
@@ -58,9 +59,9 @@ class PhoneControls:
         else:
             self.cbPtt(PttState.RELEASED)
 
-    def startBlinking(self):
+    def startBlinking(self, R=255, G=255, B=255):
         self.stopBlinking()
-        self.blinkThread = threading.Thread(target=self.__blinking__)
+        self.blinkThread = threading.Thread(target=self.__blinking__(self.R,self.G,self.B))
         self.blinkThread.start()
 
     def stopBlinking(self):
@@ -68,10 +69,11 @@ class PhoneControls:
             self.blinkThread._stop()
             self.blinkThread = None
 
-    def __blinking__(self):
+    def __blinking__(self, R, G, B):
         log.debug("Starting blink loop.")
         while True:
-            self.led.on
-            sleep(1) 
-            self.led.off
-            sleep(1)
+            self.rgbled.begin()
+            self.rgbled.setPixelColorRGB(0, self.R, self.G, self.B)
+            self.rgbled.show()
+            self.rgbled.setPixelColorRGB(0, 0, 0, 0)
+            self.rgbled.show()

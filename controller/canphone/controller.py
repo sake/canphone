@@ -117,13 +117,13 @@ class CanController:
         log.debug("Waiting entered.")
         self.state = PhoneState.WAITING
         self.mixer.mute()
-        self.hw.startBlinking() # wait blink
+        self.hw.startBlinking(255, 255, 0) # wait blink yellow
         self.hangupCall()
 
     def callingState(self):
         log.debug("Calling entered.")
         self.state = PhoneState.CALLING
-        self.hw.startBlinking() # calling blink
+        self.hw.startBlinking(0, 0, 255) # calling blink blue
         self.dialMainContact()
 
     def acceptingState(self):
@@ -139,7 +139,7 @@ class CanController:
     def ringingState(self):
         log.debug("Ringing entered.")
         self.state = PhoneState.RINGING
-        self.hw.startBlinking() # ringing blink
+        self.hw.startBlinking(255, 0 , 0) # ringing blink red
     
     def hearingState(self):
         log.debug("Hearing entered.")
