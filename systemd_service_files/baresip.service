@@ -1,0 +1,12 @@
+[Unit]
+Description=baresip
+After=network.target
+
+[Service]
+User=pi
+Group=pi
+WorkingDirectory=/home/pi
+ExecStart=/usr/bin/baresip 
+
+[Install]
+WantedBy=multi-user.target
