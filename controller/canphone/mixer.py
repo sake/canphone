@@ -1,4 +1,5 @@
 import alsaaudio
+import subprocess
 
 # documentation for alsa: https://larsimmisch.github.io/pyalsaaudio/libalsaaudio.html
 
@@ -9,6 +10,10 @@ import alsaaudio
 OUTPUTNAME = "Speaker"
 INPUTNAME = "Mic"
 CARDNAME = "Device"
+
+#f*ck*ng patch for not working alsamixer
+shell_cmd_mic_on = "amixer -c 1 sset Mic unmute cap"
+shell_cmd_mic_off = "amixer -c 1 sset Mic mute nocap"
 
 DEFAULT_VOL_OUT = 70
 DEFAULT_VOL_IN = 70
@@ -25,14 +30,20 @@ class CanMixer():
         self.mixIn.setvolume(defVolIn)
         self.mute()
 
+    def muteMic(self):
+        subprocess.run(shell_cmd_mic_off.split(" "))
+
+    def unMuteMic(self):
+        subprocess.run(shell_cmd_mic_on.split(" "))
+
     def speak(self):
         self.mixOut.setmute(True)
-        self.mixIn.setmute(False)
+        self.unMuteMic()
     
     def listen(self):
         self.mixOut.setmute(False)
-        self.mixIn.setmute(True)
+        self.muteMic()
 
     def mute(self):
         self.mixOut.setmute(True)
-        self.mixIn.setmute(True)
+        self.muteMic()
