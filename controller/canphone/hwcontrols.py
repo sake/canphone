@@ -1,11 +1,10 @@
 from threading import RLock, Lock, Event, Thread
-from gpiozero import LED, Button, Device, Pin
+from gpiozero import RGBLED, Button, Device, Pin
 from gpiozero.pins.mock import MockFactory
 from signal import pause
 from time import sleep
 from enum import Enum, auto
 import logging
-from rpi_ws281x import *
 
 log = logging.getLogger("canphone")
 
@@ -21,14 +20,22 @@ class PttState(Enum):
     PRESSED = auto()
     RELEASED = auto()
 
+
+class Color3(Enum):
+    RED = (1, 0, 0)
+    GREEN = (0, 1, 0)
+    BLUE = (0, 0, 1)
+    CYAN = (0, 1, 1)
+    MAGENTA = (1, 0, 1)
+    YELLOW = (1, 1, 0)
+    WHITE = (1, 1, 1)
+    BLACK = (0, 0, 0)
+
+
 class PhoneControls:
-    def __init__(self,  callbPush, callbHang, ledPin = 17, pttPin = 18, canPin = 19):
+    def __init__(self,  callbPush, callbHang, ledPins = (17, 27, 22), pttPin = 18, canPin = 19):
         # define properties
-        self.blinkThread: Thread = None
-        self.blinkEvent = Event()
-        self.blinkThreadLock = RLock()
-        self.lightLock = Lock()
-        self.led = LED(ledPin)
+        self.led = RGBLED(ledPins[0], ledPins[1], ledPins[2])
         self.pttButton = Device.pin_factory.pin(pttPin)
         self.canButton: Pin = Device.pin_factory.pin(canPin)
         # configure hardware
@@ -36,7 +43,6 @@ class PhoneControls:
         self.__configPinHandler__(self.canButton, self.__canCallback__)
         self.cbCan = callbHang
         self.cbPtt = callbPush
-        self.rgbled = Adafruit_NeoPixel(TOTAL_LED_COUNT, ledPin, 800000, 5, False, 255)
 
     def __configPinHandler__(self, button: Pin, cb):
         button.edges = "both"
@@ -62,44 +68,11 @@ class PhoneControls:
         else:
             self.cbPtt(PttState.RELEASED)
 
-    def startBlinking(self, R=255, G=255, B=255):
-        with self.blinkThreadLock:
-            self.stopBlinking()
-            self.blinkThread = Thread(target=self.__blinking__, args=(R, G, B))
-            self.blinkEvent.clear()
-            self.blinkThread.start()
+    def ledOff(self):
+        self.led.off()
 
-    def stopBlinking(self):
-        with self.blinkThreadLock:
-            if self.blinkThread != None:
-                self.blinkEvent.set()
-                self.blinkThread.join()
-                self.blinkThread = None
+    def ledOn(self, rgb=(1, 1, 1)):
+        self.led.value = rgb
 
-    def __blinking__(self, R, G, B):
-        log.debug("Starting blink loop.")
-        while not self.blinkEvent.is_set():
-            self.__lightOn__(R, G, B)
-            self.blinkEvent.wait(1)
-            self.__lightOff__()
-            self.blinkEvent.wait(1)
-
-    def lightOn(self, R=255, G=255, B=255):
-        self.stopBlinking()
-        self.__lightOn__(R, G, B)
-
-    def __lightOn__(self, R, G, B):
-        with self.lightLock:
-            self.rgbled.begin()
-            self.rgbled.setPixelColorRGB(0, R, G, B)
-            self.rgbled.show()
-        
-    def lightOff(self):
-        self.stopBlinking()
-        self.__lightOff__()
-
-    def __lightOff__(self):
-        with self.lightLock:
-            self.rgbled.begin()
-            self.rgbled.setPixelColorRGB(0, 0, 0, 0)
-            self.rgbled.show()
+    def startBlinking(self, rgb=(1, 1, 1), time=1):
+        self.led.blink(on_time=time, off_time=time, on_color=rgb, background=True)

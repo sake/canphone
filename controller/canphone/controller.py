@@ -1,6 +1,6 @@
 from .mqtt import MqttController, EventType
 from .mixer import CanMixer
-from .hwcontrols import PhoneControls, CanState, PttState
+from .hwcontrols import PhoneControls, CanState, PttState, Color3
 import json
 import logging
 from enum import Enum, auto
@@ -118,13 +118,13 @@ class CanController:
         log.debug("Waiting entered.")
         self.state = PhoneState.WAITING
         self.mixer.mute()
-        self.hw.startBlinking(255, 255, 0) # wait blink yellow
+        self.hw.startBlinking(Color3.CYAN.value, 2) # wait blink
         self.hangupCall()
 
     def callingState(self):
         log.debug("Calling entered.")
         self.state = PhoneState.CALLING
-        self.hw.startBlinking(0, 0, 255) # calling blink blue
+        self.hw.startBlinking(Color3.YELLOW.value) # calling blink
         self.dialMainContact()
 
     def acceptingState(self):
@@ -140,17 +140,16 @@ class CanController:
     def ringingState(self):
         log.debug("Ringing entered.")
         self.state = PhoneState.RINGING
-        self.hw.startBlinking(255, 0 , 0) # ringing blink red
+        self.hw.startBlinking(Color3.MAGENTA.value) # ringing blink
     
     def hearingState(self):
         log.debug("Hearing entered.")
         self.state = PhoneState.HEARING
         self.mixer.listen()
-        self.hw.stopBlinking()
-        self.hw.lightOn(0, 255, 0) # green light
+        self.hw.ledOn(Color3.GREEN.value) # green light
 
     def speakingState(self):
         log.debug("Speaking entered.")
         self.state = PhoneState.SPEAKING
         self.mixer.speak()
-        self.hw.lightOn(255, 255, 255) # white light
+        self.hw.ledOn(Color3.RED.value) # red light
