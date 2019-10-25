@@ -55,7 +55,7 @@ class PhoneControls:
         sleep(0.2)
         state = self.canButton.state
         log.debug("Can button state=%d", state)
-        if state == 1:
+        if state == 0:
             self.cbCan(CanState.HUNGUP)
         else:
             self.cbCan(CanState.LIFTED)
