@@ -26,6 +26,7 @@ apt install rpi.gpio
 - Change /usr/share/alsa/alsa.conf
   - set defaults.ctl.card 1 
   - set defaults.pcm.card 1 
+- Add bind_address localhost in /etc/mosquitto/mosquitto.conf to bind broker to pi only
 
 # SystemD services
 - Copy and enable service files under systemd_service_files
